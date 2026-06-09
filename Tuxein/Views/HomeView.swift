@@ -10,32 +10,26 @@ import SwiftUI
 struct HomeView: View {
     
     var proteinsViewModel: ProteinsViewModel = ProteinsViewModel();
-    @State private var selectedTab = 0
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            selectedScreen
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            TabBar(selectedTab: $selectedTab)
-                .padding(.bottom, 8)
+        Group {
+            TabView {
+                Tab("Proteins", systemImage: "atom") {
+                    ProteinsScreen(proteinsViewModel: proteinsViewModel)
+                }
+                Tab("Favorites", systemImage: "heart") {
+                    FavoritesScreenView(proteinsViewModel: proteinsViewModel)
+                }
+                Tab("Settings", systemImage: "gear") {
+                    SettingsScreenView()
+                }
+                Tab(role: .search) {
+                    SearchScreenView(proteinsViewModel: proteinsViewModel)
+                }
+            }
         }
         .task {
             await proteinsViewModel.fetchList();
-        }
-    }
-
-    @ViewBuilder
-    private var selectedScreen: some View {
-        switch selectedTab {
-        case 0:
-            ProteinsScreen(proteinsViewModel: proteinsViewModel)
-        case 1:
-            FavoritesScreenView(proteinsViewModel: proteinsViewModel)
-        case 2:
-            SettingsScreenView()
-        default:
-            ProteinsScreen(proteinsViewModel: proteinsViewModel)
         }
     }
 }

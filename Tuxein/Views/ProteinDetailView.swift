@@ -26,6 +26,14 @@ struct ProteinDetailView: View {
         .navigationTitle(protein.id)
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                }
+            }
+            
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
                     print("Partage")

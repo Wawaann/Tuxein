@@ -17,36 +17,30 @@ struct ProteinsListView: View {
     var proteinList: [Protein];
     var proteinsViewModel: ProteinsViewModel;
     
-    // @State private var selectedProtein: SelectedProtein?;
+    @State private var selectedProtein: SelectedProtein?;
     
     var body: some View {
-        NavigationStack {
-            List(proteinList) { protein in
-                // ProteinRow(selectedProtein: $selectedProtein, protein: protein, proteinsViewModel: proteinsViewModel)
-                ProteinRow(protein: protein, proteinsViewModel: proteinsViewModel)
+        List(proteinList) { protein in
+            ProteinRow(selectedProtein: $selectedProtein, protein: protein, proteinsViewModel: proteinsViewModel)
+        }
+        .fullScreenCover(item: $selectedProtein) { selectedProtein in
+            NavigationStack {
+                ProteinDetailView(protein: selectedProtein.protein, proteinsViewModel: proteinsViewModel)
             }
-            // .fullScreenCover(item: $selectedProtein) { selectedProtein in
-            //     NavigationStack {
-            //         ProteinDetailView(protein: selectedProtein.protein, proteinsViewModel: proteinsViewModel)
-            //     }
-            // }
         }
     }
 }
 
 private struct ProteinRow: View {
     
-    // @Binding var selectedProtein: SelectedProtein?;
+    @Binding var selectedProtein: SelectedProtein?;
     var protein: Protein;
     var proteinsViewModel: ProteinsViewModel;
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Button {
-            //     selectedProtein = SelectedProtein(protein: protein)
-            // } label: {
-            NavigationLink {
-                ProteinDetailView(protein: protein, proteinsViewModel: proteinsViewModel)
+            Button {
+                selectedProtein = SelectedProtein(protein: protein)
             } label: {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -72,7 +66,7 @@ private struct ProteinRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
             }
-            // .buttonStyle(.plain)
+            .buttonStyle(.plain)
             
             HStack {
                 Spacer()

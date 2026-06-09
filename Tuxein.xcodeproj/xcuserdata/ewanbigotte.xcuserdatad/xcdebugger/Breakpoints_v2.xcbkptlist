@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "FA1F4C72-7F26-4386-8956-3769F4B4C4B1"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A23C31C0-A851-4A6D-8A6E-2FA4CA126901"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../../../../var/folders/zm/cjq_8gtx1f1b3_rfzqvdw6fr0000gn/T/swift-generated-sources/@__swiftmacro_6Tuxein0023LingandsListswift_elFCffMX40_0_33_1560BE12C92BE495C2E4F9EBE0978026Ll10PlaygroundfMf_.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1"
+            endingLineNumber = "1"
+            landmarkName = "$s6Tuxein0023LingandsListswift_elFCffMX40_0_33_1560BE12C92BE495C2E4F9EBE0978026Ll10PlaygroundfMf_24PlaygroundEntryContainerfMu_"
+            landmarkType = "37">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "22F56A73-7260-4FD1-B5DD-E2884CEFA62B"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Tuxein/ViewModels/Services/Lingands/MockLingandsService.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "12"
+            endingLineNumber = "12"
+            landmarkName = "fetchList()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "67017FD1-0316-410A-9EEA-34BD87A3F9F5"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../../../../../../var/folders/zm/cjq_8gtx1f1b3_rfzqvdw6fr0000gn/T/swift-generated-sources/@__swiftmacro_6Tuxein0028ProteinsViewModelswift_IxAFhfMX51_0_33_30AB80A8C31A12D24F89C30E1F6D3516Ll10PlaygroundfMf_.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1"
+            endingLineNumber = "1"
+            landmarkName = "$s6Tuxein0028ProteinsViewModelswift_IxAFhfMX51_0_33_30AB80A8C31A12D24F89C30E1F6D3516Ll10PlaygroundfMf_24PlaygroundEntryContainerfMu_"
+            landmarkType = "37">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

@@ -20,7 +20,6 @@ struct ProteinsListView: View {
     // @State private var selectedProtein: SelectedProtein?;
     
     var body: some View {
-        NavigationStack {
             List(proteinList) { protein in
                 // ProteinRow(selectedProtein: $selectedProtein, protein: protein, proteinsViewModel: proteinsViewModel)
                 ProteinRow(protein: protein, proteinsViewModel: proteinsViewModel)
@@ -30,7 +29,6 @@ struct ProteinsListView: View {
             //         ProteinDetailView(protein: selectedProtein.protein, proteinsViewModel: proteinsViewModel)
             //     }
             // }
-        }
     }
 }
 

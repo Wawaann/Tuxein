@@ -10,6 +10,7 @@ import SwiftUI
 struct ProteinsScreen: View {
     
     var proteinsViewModel: ProteinsViewModel;
+    @Binding var searchQuery: String;
     
     var body: some View {
         NavigationStack {
@@ -22,7 +23,14 @@ struct ProteinsScreen: View {
                         Text("Loading...")
                     }
                 case .loaded(let list):
-                    ProteinsListView(proteinList: list, proteinsViewModel: proteinsViewModel)
+                    
+                    let filteredList = searchQuery.isEmpty
+                        ? list
+                        : list.filter { item in
+                            item.id.localizedCaseInsensitiveContains(searchQuery)
+                        }
+                    
+                    ProteinsListView(proteinList: filteredList, proteinsViewModel: proteinsViewModel)
                 case .error(let error):
                     Text(error)
                 }
@@ -34,12 +42,23 @@ struct ProteinsScreen: View {
 }
 
 #Preview {
-    
-    let service = MockProteinsService();
-    let viewModel = ProteinsViewModel(service: service);
-    
-    ProteinsScreen(proteinsViewModel: viewModel)
-        .task {
-            await viewModel.fetchList();
-        }
+    PreviewWrapper()
 }
+
+private struct PreviewWrapper: View {
+    @State private var searchQuery: String = "";
+    let viewModel: ProteinsViewModel;
+
+    init() {
+        let service = MockProteinsService();
+        self.viewModel = ProteinsViewModel(service: service);
+    }
+
+    var body: some View {
+        ProteinsScreen(proteinsViewModel: viewModel, searchQuery: $searchQuery)
+            .task {
+                await viewModel.fetchList();
+            }
+    }
+}
+

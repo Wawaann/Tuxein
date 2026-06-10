@@ -9,14 +9,14 @@ import SwiftUI
 
 struct TabBar: View {
     @Binding var selectedTab: Int;
+    @Binding var searchText: String;
 
     @Namespace private var tabAnimation;
     @FocusState private var isSearchFocused: Bool;
     @State private var isSearchExpanded = false;
-    @State private var searchText = "";
 
-    private let tint = Color.purple
-    private let tabs = ["atom", "heart.fill", "gear"]
+    private let tint = Color.purple;
+    private let tabs = ["atom", "heart.fill", "gear"];
 
     var body: some View {
         HStack(spacing: 10) {
@@ -49,6 +49,7 @@ struct TabBar: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(accessibilityLabel(for: index))
+                .padding(.horizontal, 2)
             }
         }
         .padding(6)
@@ -79,7 +80,7 @@ struct TabBar: View {
 
                 if !searchText.isEmpty {
                     Button {
-                        searchText = ""
+                        searchText = "";
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 16, weight: .semibold))
@@ -138,11 +139,11 @@ private extension View {
 
 #Preview {
     PreviewWrapper()
-        .padding()
 }
 
 private struct PreviewWrapper: View {
     @State private var selectedTab = 0
+    @State private var searchQuery: String = "";
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -153,7 +154,7 @@ private struct PreviewWrapper: View {
             )
             .ignoresSafeArea()
 
-            TabBar(selectedTab: $selectedTab)
+            TabBar(selectedTab: $selectedTab, searchText: $searchQuery)
         }
     }
 }

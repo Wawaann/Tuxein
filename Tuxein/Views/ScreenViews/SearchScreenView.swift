@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SearchScreenView: View {
     
-    @State private var searchQuery: String = "";
+    @Binding var searchQuery: String;
     var proteinsViewModel: ProteinsViewModel;
     
     var body: some View {
@@ -39,18 +39,27 @@ struct SearchScreenView: View {
             }
             .navigationTitle(Text("Search proteins"))
             .toolbarTitleDisplayMode(.inlineLarge)
-            .searchable(text: $searchQuery)
         }
     }
 }
 
 #Preview {
-    
-    let service = MockProteinsService();
-    let viewModel = ProteinsViewModel(service: service);
-    
-    SearchScreenView(proteinsViewModel: viewModel)
-        .task {
-            await viewModel.fetchList();
-        }
+    PreviewWrapper()
+}
+
+private struct PreviewWrapper: View {
+    @State private var searchQuery: String = "";
+    let viewModel: ProteinsViewModel;
+
+    init() {
+        let service = MockProteinsService();
+        self.viewModel = ProteinsViewModel(service: service);
+    }
+
+    var body: some View {
+        SearchScreenView(searchQuery: $searchQuery, proteinsViewModel: viewModel)
+            .task {
+                await viewModel.fetchList();
+            }
+    }
 }

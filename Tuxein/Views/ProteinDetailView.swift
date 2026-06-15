@@ -6,24 +6,32 @@
 //
 
 import SwiftUI
+import RealityKit
 
 struct ProteinDetailView: View {
     
     @Environment(\.dismiss) private var dismiss
     
-    let protein: Protein
+    let id: String;
     var proteinsViewModel: ProteinsViewModel;
     
     var body: some View {
-        VStack {
-            Spacer()
-            
-            Text("Protein \"\(protein.id)\" 3D View")
-            Text("Formula \"\(protein.formula)\"")
-            
-            Spacer()
+        Group {
+            switch proteinsViewModel.proteinState {
+            case .idle:
+                Text("Y a rien")
+            case .loading:
+                ProgressView()
+            case .loaded(let protein):
+                Protein3DView(protein: protein)
+            case .error(let error):
+                Text(error)
+            }
         }
-        .navigationTitle(protein.id)
+        .task {
+            await proteinsViewModel.fetchProteinDetails(for: id);
+        }
+        .navigationTitle(id)
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -41,23 +49,37 @@ struct ProteinDetailView: View {
                     Image(systemName: "square.and.arrow.up")
                 }
                 
-                FavoriteButton(proteinID: protein.id, proteinsViewModel: proteinsViewModel)
+                FavoriteButton(proteinID: id, proteinsViewModel: proteinsViewModel)
             }
         }
     }
 }
 
 #Preview {
+    PreviewWrapper();
+}
+
+private struct PreviewWrapper: View {
+    @State var viewModel: ProteinsViewModel = ProteinsViewModel(service: MockProteinsService());
     
-    let service = MockProteinsService();
-    let viewModel = ProteinsViewModel(service: service);
-    let protein: Protein = .init(
-        id: "001",
-        type: "NON-POLYMER",
-        formula: "C35 H42 F2 N2 O6"
-        , weight: 624.75
-    )
-    NavigationStack {
-        ProteinDetailView(protein: protein, proteinsViewModel: viewModel)
+    var body: some View {
+        Group {
+            switch viewModel.proteinState {
+            case .idle:
+                Text("Y a rien")
+            case .loading:
+                ProgressView()
+            case .loaded(let protein):
+                NavigationStack {
+                    ProteinDetailView(id: protein.id, proteinsViewModel: viewModel)
+                }
+            case .error(let error):
+                Text(error)
+            }
+        }
+        .task {
+            await viewModel.fetchList();
+            await viewModel.fetchProteinDetails(for: "001");
+        }
     }
 }

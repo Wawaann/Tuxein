@@ -28,8 +28,6 @@ struct SearchScreenView: View {
                         ? list
                         : list.filter { item in
                             item.id.localizedCaseInsensitiveContains(searchQuery)
-                                || item.type.localizedCaseInsensitiveContains(searchQuery)
-                                || item.formula.localizedCaseInsensitiveContains(searchQuery)
                         }
                     
                     ProteinsListView(proteinList: filteredList, proteinsViewModel: proteinsViewModel)

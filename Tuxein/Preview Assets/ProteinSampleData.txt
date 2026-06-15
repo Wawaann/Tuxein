@@ -3,10 +3,7 @@ data_001
 
 _chem_comp.id                                   001
 _chem_comp.name
-;1-[2,2-DIFLUORO-2-(3,4,5-TRIMETHOXY-PHENYL)-ACETYL]-PIPERIDINE-2-CARBOXYLIC ACID
-4-PHENYL-1-(3-PYRIDIN-3-YL-PROPYL)-BUTYL ESTER
-;
-
+;1-[2,2-DIFLUORO-2-(3,4,5-TRIMETHOXY-PHENYL)-ACETYL]-PIPERIDINE-2-CARBOXYLIC ACID 4-PHENYL-1-(3-PYRIDIN-3-YL-PROPYL)-BUTYL ESTER;
 _chem_comp.type                                 NON-POLYMER
 _chem_comp.pdbx_type                            HETAIN
 _chem_comp.formula                              "C35 H42 F2 N2 O6"

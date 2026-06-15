@@ -25,7 +25,7 @@ struct ProteinsListView: View {
         }
         .fullScreenCover(item: $selectedProtein) { selectedProtein in
             NavigationStack {
-                ProteinDetailView(protein: selectedProtein.protein, proteinsViewModel: proteinsViewModel)
+                ProteinDetailView(id: selectedProtein.protein.id, proteinsViewModel: proteinsViewModel)
             }
         }
     }
@@ -103,14 +103,33 @@ private struct ProteinInfoRow: View {
 }
 
 #Preview {
+    PreviewWrapper()
+}
+
+private struct PreviewWrapper: View {
+    let viewModel = ProteinsViewModel(service: DefaultProteinsService());
     
-    let service = MockProteinsService();
-    let list = service.fetchListPreview();
-    let viewModel = ProteinsViewModel(service: service);
-    
-    NavigationStack {
-        ProteinsListView(proteinList: list, proteinsViewModel: viewModel)
+    var body: some View {
+        NavigationStack {
+            Group {
+                switch viewModel.listState {
+                case .idle:
+                    Text("No data yet")
+                case .loading:
+                    ProgressView {
+                        Text("Loading...")
+                    }
+                case .loaded(let list):
+                    ProteinsListView(proteinList: list, proteinsViewModel: viewModel)
+                case .error(let error):
+                    Text(error)
+                }
+            }
             .navigationTitle(Text("Proteins"))
             .toolbarTitleDisplayMode(.inlineLarge)
+        }
+        .task {
+            await viewModel.fetchList()
+        }
     }
 }

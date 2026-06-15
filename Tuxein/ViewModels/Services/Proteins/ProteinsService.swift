@@ -9,7 +9,7 @@ import Foundation
 
 protocol ProteinsService {
     func fetchList() async throws -> [Protein];
-    func fetchProteinDetails(for identifier: String) async throws -> String;
+    func fetchProteinDetails(for identifier: String) async throws -> ([Atom], [Bond]);
     
     func load() -> Set<String>;
     func save(favoriteIDs: Set<String>);

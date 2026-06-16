@@ -15,8 +15,8 @@ struct TabBar: View {
     @State private var isSearchExpanded = false;
     @State private var searchText = "";
 
-    private let tint = Color.purple
-    private let tabs = ["atom", "heart.fill", "gear"]
+    private let tint = Color.purple;
+    private let tabs = ["atom", "heart.fill", "gear"];
 
     var body: some View {
         HStack(spacing: 10) {
@@ -35,9 +35,9 @@ struct TabBar: View {
                     selectTab(index)
                 } label: {
                     Image(systemName: tabs[index])
-                        .font(.system(size: 19, weight: .semibold))
+                        .font(.system(size: 24, weight: .semibold))
                         .symbolEffect(.bounce, value: selectedTab == index)
-                        .frame(width: 48, height: 42)
+                        .frame(width: 52, height: 42)
                         .foregroundStyle(selectedTab == index ? tint : .secondary)
                         .background {
                             if selectedTab == index {
@@ -51,7 +51,7 @@ struct TabBar: View {
                 .accessibilityLabel(accessibilityLabel(for: index))
             }
         }
-        .padding(6)
+        .padding(8)
         .glassBarBackground()
     }
 
@@ -61,7 +61,7 @@ struct TabBar: View {
                 toggleSearch()
             } label: {
                 Image(systemName: "magnifyingglass")
-                    .font(.system(size: 18, weight: .semibold))
+                    .font(.system(size: 24, weight: .semibold))
                     .frame(width: 36, height: 36)
                     .foregroundStyle(isSearchExpanded ? tint : .secondary)
                     .contentShape(Circle())

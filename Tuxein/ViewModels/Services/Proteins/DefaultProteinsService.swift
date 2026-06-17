@@ -46,9 +46,79 @@ struct DefaultProteinsService: ProteinsService {
         }
     }
     
-    func fetchProteinDetails(for identifier: String) async throws -> String {
+    func getCompAtomInfo(lines: [Substring]) -> [Atom] {
+        var compAtom: [Substring] = [];
+        var atoms: [Atom] = [];
+        
+        print("Sublines: ")
+        for line in lines {
+                print(line)
+        }
+        
+        for line in lines {
+            
+            if line.starts(with: "_chem_comp_atom") {
+                compAtom.append(line.split(separator: ".").last!);
+            } else if line.starts(with: "#") {
+                break;
+            } else {
+                var compAtomValue: [Substring: Substring] = [:]
+                let values = line.split(separator: " ");
+                
+                for (compAtomKey, value) in zip(compAtom, values) {
+                    compAtomValue[compAtomKey] = value;
+                }
+                
+                guard let atom = Atom(from: compAtomValue) else {
+                    print("Failed to get an atom");
+                    continue;
+                }
+                
+                atoms.append(atom);
+            }
+        }
+        
+        return atoms;
+    }
+    
+    func getCompBondInfo(lines: [Substring]) -> [Bond] {
+        var compBond: [Substring] = [];
+        var bonds: [Bond] = [];
+        
+        for line in lines {
+            if line.starts(with: "_chem_comp_bond") {
+                compBond.append(line.split(separator: ".").last!);
+            } else if line.starts(with: "#") {
+                break;
+            } else {
+                var compBondValue: [Substring: Substring] = [:]
+                let values = line.split(separator: " ");
+                
+                for (compBondKey, value) in zip(compBond, values) {
+                    compBondValue[compBondKey] = value;
+                }
+                
+                guard let bond = Bond(from: compBondValue) else {
+                    print("Failed to get a bond");
+                    continue;
+                }
+                
+                bonds.append(bond);
+            }
+        }
+        
+        return bonds;
+    }
+    
+    func fetchProteinDetails(for identifier: String) async throws -> ([Atom], [Bond]) {
 
-        guard let url = URL(string: detailsURL + identifier + ".cif") else {
+        print("ID: \(identifier.lowercased())")
+        
+        let rawUrl: String = detailsURL + identifier.lowercased() + ".cif";
+        
+        print("Raw URL: \(rawUrl)")
+        
+        guard let url = URL(string: rawUrl) else {
             throw URLError(.badURL);
         }
         
@@ -56,10 +126,17 @@ struct DefaultProteinsService: ProteinsService {
             let (data, _) = try await URLSession.shared.data(from: url);
             
             guard let file = String(data: data, encoding: .utf8) else {
-                throw URLError(.badURL)
+                throw URLError(.badURL);
             }
             
-            return file;
+            let lines: [Substring] = file.split(separator: "\n");
+            let atomLoopIndex: Int = lines.firstIndex(where: { $0.contains("_chem_comp_atom") })!;
+            let bondLoopIndex: Int = lines.firstIndex(where: { $0.contains("_chem_comp_bond") })!;
+            
+            let atoms = getCompAtomInfo(lines: Array(lines.dropFirst(atomLoopIndex)));
+            let bonds = getCompBondInfo(lines: Array(lines.dropFirst(bondLoopIndex)));
+            
+            return (atoms, bonds);
         }
         catch {
             throw URLError(.badServerResponse)

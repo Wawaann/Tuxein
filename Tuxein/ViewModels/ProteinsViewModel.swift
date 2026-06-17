@@ -12,7 +12,7 @@ import Observation
 class ProteinsViewModel {
     
     var listState: LoadingState<[Protein]> = .idle;
-    var proteinState: LoadingState<String> = .idle;
+    var proteinState: LoadingState<Protein> = .idle;
     
     private(set) var favoritesIDs: Set<String> = [];
 
@@ -38,14 +38,24 @@ class ProteinsViewModel {
     }
     
     func fetchProteinDetails(for identifier: String) async {
-        guard !proteinState.isLoading || proteinState.error != nil else { return }
-                
+        guard !proteinState.isLoading else { return }
+        
+        let normalizedIdentifier = identifier.uppercased();
         self.proteinState = .loading;
         
         do {
-            let file = try await self.service.fetchProteinDetails(for: identifier);
+            let (atoms, bonds) = try await self.service.fetchProteinDetails(for: normalizedIdentifier);
             
-            self.proteinState = .loaded(file);
+            guard var protein = self.listState.data?.first(where: { $0.id == normalizedIdentifier }) else {
+                throw ProteinsError.invalidDecoding;
+            }
+            
+            protein.atoms = atoms;
+            protein.bonds = bonds;
+            
+            print(protein);
+            
+            self.proteinState = .loaded(protein);
         } catch let error {
             self.proteinState = .error("\(error)");
         }
@@ -83,14 +93,11 @@ import Playgrounds
     await proteins.fetchList();
     await proteins.fetchProteinDetails(for: "001");
     
-    switch proteins.listState {
+    switch proteins.proteinState {
     case .idle: print("idle");
     case .loading: print("loading");
-    case .loaded(_):
-        print("data loaded")
-//            for protein in data {
-//                print("id: \(protein.id), \(protein.formula)");
-//            }
+    case .loaded(let protein):
+        print(protein)
     case .error(let error): print(error);
     }
 }

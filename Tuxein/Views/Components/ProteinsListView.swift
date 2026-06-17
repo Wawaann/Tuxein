@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct SelectedProtein: Identifiable {
     let protein: Protein;
@@ -16,35 +17,45 @@ struct ProteinsListView: View {
 
     var proteinList: [Protein];
     var proteinsViewModel: ProteinsViewModel;
-    
-    // @State private var selectedProtein: SelectedProtein?;
+    @Binding var showTabBar: Bool;
     
     var body: some View {
-            List(proteinList) { protein in
-                // ProteinRow(selectedProtein: $selectedProtein, protein: protein, proteinsViewModel: proteinsViewModel)
-                ProteinRow(protein: protein, proteinsViewModel: proteinsViewModel)
+        if proteinList.isEmpty {
+//            ContentUnavailableView("No protein found", image: "ProteinIcon")
+            ContentUnavailableView {
+                Image("ProteinIcon")
+                    .resizable()
+                    .frame(width: 100, height: 100)
+                Text("No protein found")
+                    .padding(.top, 12)
             }
-            // .fullScreenCover(item: $selectedProtein) { selectedProtein in
-            //     NavigationStack {
-            //         ProteinDetailView(protein: selectedProtein.protein, proteinsViewModel: proteinsViewModel)
-            //     }
-            // }
+            .padding(.bottom, 20)
+        } else {
+            List(proteinList) { protein in
+                ProteinRow(protein: protein, proteinsViewModel: proteinsViewModel, showTabBar: $showTabBar)
+            }
+        }
     }
 }
 
 private struct ProteinRow: View {
     
-    // @Binding var selectedProtein: SelectedProtein?;
     var protein: Protein;
     var proteinsViewModel: ProteinsViewModel;
+    @Binding var showTabBar: Bool;
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Button {
-            //     selectedProtein = SelectedProtein(protein: protein)
-            // } label: {
             NavigationLink {
-                ProteinDetailView(protein: protein, proteinsViewModel: proteinsViewModel)
+                ProteinDetailView(
+                    id: protein.id,
+                    proteinsViewModel: proteinsViewModel,
+                    showTabBar: $showTabBar
+                )
+                    .onAppear {
+                        showTabBar = false
+                        UIApplication.shared.hideKeyboard()
+                    }
             } label: {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -70,7 +81,6 @@ private struct ProteinRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
             }
-            // .buttonStyle(.plain)
             
             HStack {
                 Spacer()
@@ -106,15 +116,41 @@ private struct ProteinInfoRow: View {
     }
 }
 
+extension UIApplication {
+    func hideKeyboard() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil);
+    }
+}
+
 #Preview {
+    PreviewWrapper()
+}
+
+private struct PreviewWrapper: View {
+    let viewModel = ProteinsViewModel(service: DefaultProteinsService());
+    @State private var showTabBar: Bool = true;
     
-    let service = MockProteinsService();
-    let list = service.fetchListPreview();
-    let viewModel = ProteinsViewModel(service: service);
-    
-    NavigationStack {
-        ProteinsListView(proteinList: list, proteinsViewModel: viewModel)
+    var body: some View {
+        NavigationStack {
+            Group {
+                switch viewModel.listState {
+                case .idle:
+                    Text("No data yet")
+                case .loading:
+                    ProgressView {
+                        Text("Loading...")
+                    }
+                case .loaded(let list):
+                    ProteinsListView(proteinList: list, proteinsViewModel: viewModel, showTabBar: $showTabBar)
+                case .error(let error):
+                    Text(error)
+                }
+            }
             .navigationTitle(Text("Proteins"))
             .toolbarTitleDisplayMode(.inlineLarge)
+        }
+        .task {
+            await viewModel.fetchList()
+        }
     }
 }

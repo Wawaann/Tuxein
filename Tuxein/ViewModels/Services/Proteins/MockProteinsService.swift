@@ -41,7 +41,64 @@ struct MockProteinsService: ProteinsService {
         }
     }
     
-    func fetchProteinDetails(for identifier: String) async throws -> String {
+    func getCompAtomInfo(lines: [Substring]) -> [Atom] {
+        var compAtom: [Substring] = [];
+        var atoms: [Atom] = [];
+        
+        for line in lines {
+            
+            if line.starts(with: "_chem_comp_atom") {
+                compAtom.append(line.split(separator: ".").last!);
+            } else if line.starts(with: "#") {
+                break;
+            } else {
+                var compAtomValue: [Substring: Substring] = [:]
+                let values = line.split(separator: " ");
+                
+                for (compAtomKey, value) in zip(compAtom, values) {
+                    compAtomValue[compAtomKey] = value;
+                }
+                
+                guard let atom = Atom(from: compAtomValue) else {
+                    continue;
+                }
+                
+                atoms.append(atom);
+            }
+        }
+        
+        return atoms;
+    }
+    
+    func getCompBondInfo(lines: [Substring]) -> [Bond] {
+        var compBond: [Substring] = [];
+        var bonds: [Bond] = [];
+        
+        for line in lines {
+            if line.starts(with: "_chem_comp_bond") {
+                compBond.append(line.split(separator: ".").last!);
+            } else if line.starts(with: "#") {
+                break;
+            } else {
+                var compBondValue: [Substring: Substring] = [:]
+                let values = line.split(separator: " ");
+                
+                for (compBondKey, value) in zip(compBond, values) {
+                    compBondValue[compBondKey] = value;
+                }
+                
+                guard let bond = Bond(from: compBondValue) else {
+                    continue;
+                }
+                
+                bonds.append(bond);
+            }
+        }
+        
+        return bonds;
+    }
+    
+    func fetchProteinDetails(for identifier: String) async throws -> ([Atom], [Bond]) {
         guard let url = Bundle.main.url(forResource: "ProteinSampleData", withExtension: "txt") else {
             throw ProteinsError.invalidDecoding;
         }
@@ -53,7 +110,14 @@ struct MockProteinsService: ProteinsService {
                 throw URLError(.badURL)
             }
             
-            return file;
+            let lines: [Substring] = file.split(separator: "\n");
+            let atomLoopIndex: Int = lines.firstIndex(where: { $0.contains("_chem_comp_atom") })!;
+            let bondLoopIndex: Int = lines.firstIndex(where: { $0.contains("_chem_comp_bond") })!;
+            
+            let atoms = getCompAtomInfo(lines: Array(lines.dropFirst(atomLoopIndex)));
+            let bonds = getCompBondInfo(lines: Array(lines.dropFirst(bondLoopIndex)));
+            
+            return (atoms, bonds);
         } catch {
             throw ProteinsError.invalidDecoding;
         }

@@ -7,10 +7,11 @@
 
 import SwiftUI
 
-struct ProteinsScreen: View {
+struct ProteinsScreenView: View {
     
     var proteinsViewModel: ProteinsViewModel;
     @Binding var searchQuery: String;
+    @Binding var showTabBar: Bool;
     
     var body: some View {
         NavigationStack {
@@ -27,10 +28,11 @@ struct ProteinsScreen: View {
                     let filteredList = searchQuery.isEmpty
                         ? list
                         : list.filter { item in
-                            item.id.localizedCaseInsensitiveContains(searchQuery)
+                            item.id.localizedCaseInsensitiveContains(searchQuery) ||
+                            item.formula.localizedStandardContains(searchQuery)
                         }
                     
-                    ProteinsListView(proteinList: filteredList, proteinsViewModel: proteinsViewModel)
+                    ProteinsListView(proteinList: filteredList, proteinsViewModel: proteinsViewModel, showTabBar: $showTabBar)
                 case .error(let error):
                     Text(error)
                 }
@@ -47,6 +49,7 @@ struct ProteinsScreen: View {
 
 private struct PreviewWrapper: View {
     @State private var searchQuery: String = "";
+    @State private var showTabBar: Bool = false;
     let viewModel: ProteinsViewModel;
 
     init() {
@@ -55,10 +58,9 @@ private struct PreviewWrapper: View {
     }
 
     var body: some View {
-        ProteinsScreen(proteinsViewModel: viewModel, searchQuery: $searchQuery)
+        ProteinsScreenView(proteinsViewModel: viewModel, searchQuery: $searchQuery, showTabBar: $showTabBar)
             .task {
                 await viewModel.fetchList();
             }
     }
 }
-

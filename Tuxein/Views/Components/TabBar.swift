@@ -14,33 +14,61 @@ struct TabBar: View {
     @Namespace private var tabAnimation;
     @FocusState private var isSearchFocused: Bool;
     @State private var isSearchExpanded = false;
+    
+    @Binding var showTabBar: Bool;
 
     private let tint = Color.purple;
     private let tabs = ["atom", "heart.fill", "gear"];
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             tabsContainer
-
+            
+            Spacer()
+            
             searchButton
         }
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 50)
         .animation(.snappy(duration: 0.28), value: isSearchExpanded)
+        .offset(y: showTabBar ? 0 : 150)
+        .animation(.snappy(duration: showTabBar ? 0.3 : 0.5), value: showTabBar)
     }
 
     private var tabsContainer: some View {
-        HStack(spacing: 6) {
-            ForEach(tabs.indices, id: \.self) { index in
+        HStack(spacing: 4) {
+            if !isSearchExpanded {
+                ForEach(tabs.indices, id: \.self) { index in
+                    Button {
+                        selectTab(index)
+                    } label: {
+                        Image(systemName: tabs[index])
+                            .font(.system(size: 22, weight: .semibold))
+                            .symbolEffect(.bounce, value: selectedTab == index)
+                            .frame(width: 56, height: 36)
+                            .foregroundStyle(selectedTab == index ? tint : .secondary)
+                            .background {
+                                if selectedTab == index {
+                                    Capsule(style: .continuous)
+                                        .fill(tint.opacity(0.16))
+                                        .matchedGeometryEffect(id: "TAB_SELECTION", in: tabAnimation)
+                                }
+                            }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(accessibilityLabel(for: index))
+                    .padding(.horizontal, 3)
+                }
+            } else {
                 Button {
-                    selectTab(index)
+                    selectTab(selectedTab)
                 } label: {
-                    Image(systemName: tabs[index])
-                        .font(.system(size: 19, weight: .semibold))
-                        .symbolEffect(.bounce, value: selectedTab == index)
-                        .frame(width: 48, height: 42)
-                        .foregroundStyle(selectedTab == index ? tint : .secondary)
+                    Image(systemName: tabs[selectedTab])
+                        .font(.system(size: 24, weight: .semibold))
+                        .symbolEffect(.bounce, value: selectedTab == selectedTab)
+                        .frame(width: 58, height: 36)
+                        .foregroundStyle(selectedTab == selectedTab ? tint : .secondary)
                         .background {
-                            if selectedTab == index {
+                            if selectedTab == selectedTab {
                                 Capsule(style: .continuous)
                                     .fill(tint.opacity(0.16))
                                     .matchedGeometryEffect(id: "TAB_SELECTION", in: tabAnimation)
@@ -48,11 +76,12 @@ struct TabBar: View {
                         }
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(accessibilityLabel(for: index))
+                .accessibilityLabel(accessibilityLabel(for: selectedTab))
                 .padding(.horizontal, 2)
             }
         }
-        .padding(6)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 4)
         .glassBarBackground()
     }
 
@@ -62,8 +91,8 @@ struct TabBar: View {
                 toggleSearch()
             } label: {
                 Image(systemName: "magnifyingglass")
-                    .font(.system(size: 18, weight: .semibold))
-                    .frame(width: 36, height: 36)
+                    .font(.system(size: 24, weight: .semibold))
+                    .frame(width: 58, height: 36)
                     .foregroundStyle(isSearchExpanded ? tint : .secondary)
                     .contentShape(Circle())
             }
@@ -92,8 +121,9 @@ struct TabBar: View {
                 }
             }
         }
-        .frame(width: isSearchExpanded ? 174 : 48, height: 54)
-        .padding(.horizontal, isSearchExpanded ? 10 : 3)
+        .frame(width: isSearchExpanded ? 200 : 58, height: 36)
+        .padding(.horizontal, isSearchExpanded ? 10 : 6)
+        .padding(.vertical, 4)
         .glassBarBackground()
     }
 
@@ -144,6 +174,7 @@ private extension View {
 private struct PreviewWrapper: View {
     @State private var selectedTab = 0
     @State private var searchQuery: String = "";
+    @State private var showTabBar: Bool = true;
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -153,8 +184,20 @@ private struct PreviewWrapper: View {
                 endPoint: .top
             )
             .ignoresSafeArea()
+            
+            VStack {
+                Button {
+                    showTabBar.toggle();
+                } label: {
+                    Text("Toggle Tab bar")
+                }
+                .buttonStyle(.bordered)
+                
+                Spacer()
+            }
+            .padding(.top, 350)
 
-            TabBar(selectedTab: $selectedTab, searchText: $searchQuery)
+            TabBar(selectedTab: $selectedTab, searchText: $searchQuery, showTabBar: $showTabBar)
         }
     }
 }

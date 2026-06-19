@@ -11,6 +11,8 @@ import Observation
 @Observable
 class ProteinsViewModel {
     
+    // MARK: ViewModel variables and initializer
+
     var listState: LoadingState<[Protein]> = .idle;
     var proteinState: LoadingState<Protein> = .idle;
     
@@ -21,6 +23,8 @@ class ProteinsViewModel {
     init (service: ProteinsService = DefaultProteinsService()) {
         self.service = service;
     }
+    
+    // MARK: Fetch protein list
     
     func fetchList() async {
         
@@ -36,6 +40,8 @@ class ProteinsViewModel {
             self.listState = .error("\(error)");
         }
     }
+    
+    // MARK: Fetch protein details
     
     func fetchProteinDetails(for identifier: String) async {
         guard !proteinState.isLoading else { return }
@@ -60,6 +66,8 @@ class ProteinsViewModel {
             self.proteinState = .error("\(error)");
         }
     }
+    
+    // MARK: Favorites function
     
     func load() {
         self.favoritesIDs = self.service.load();

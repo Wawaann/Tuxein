@@ -7,7 +7,15 @@
 
 import Foundation
 
-struct Atom: Identifiable, Equatable {
+// MARK: Comp protocol
+
+protocol ComponentBuildable {
+    init?(from compValue: [Substring: Substring]);
+}
+
+// MARK: Atom component
+
+struct Atom: Identifiable, Equatable, ComponentBuildable {
     var id: String;
     var type: String;
     var x: Float;
@@ -45,7 +53,9 @@ struct Atom: Identifiable, Equatable {
     }
 }
 
-struct Bond: Identifiable, Equatable {
+// MARK: Bond component
+
+struct Bond: Identifiable, Equatable, ComponentBuildable {
     var id: String;
     var valueOrder: String;
     var aromticFlag: Bool;
@@ -77,6 +87,8 @@ struct Bond: Identifiable, Equatable {
         "Bond(id: \(id), valueOrder: \(valueOrder), aromticFlag: \(aromticFlag), stereoConfig: \(stereoConfig))"
     }
 }
+
+// MARK: Protein model
 
 struct Protein: Identifiable, Equatable, CustomStringConvertible {
     var id: String;

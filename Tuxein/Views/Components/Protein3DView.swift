@@ -8,6 +8,13 @@
 import SwiftUI
 import RealityKit
 
+/*
+
+ À faire:
+    - voir si possibilité de fix l'affichage d'un seul
+      atome au coordonnée (0, 0, 0).
+*/
+
 struct Protein3DView: View {
     
     var protein: Protein;

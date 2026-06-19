@@ -9,6 +9,8 @@ import Foundation
 
 struct MockProteinsService: ProteinsService {
     
+    // MARK: Fetch list
+    
     func fetchList() async throws -> [Protein] {
         guard let url = Bundle.main.url(forResource: "ProteinsListSampleData", withExtension: "txt") else {
             throw ProteinsError.invalidDecoding;
@@ -41,61 +43,58 @@ struct MockProteinsService: ProteinsService {
         }
     }
     
-    func getCompAtomInfo(lines: [Substring]) -> [Atom] {
-        var compAtom: [Substring] = [];
-        var atoms: [Atom] = [];
+    // MARK: Fetch protein details
+    
+    private func getCompValue(from line: Substring, comp: inout [Substring], compValue: inout [Substring: Substring], oneComp: inout Bool) {
         
-        for line in lines {
-            
-            if line.starts(with: "_chem_comp_atom") {
-                compAtom.append(line.split(separator: ".").last!);
-            } else if line.starts(with: "#") {
-                break;
-            } else {
-                var compAtomValue: [Substring: Substring] = [:]
-                let values = line.split(separator: " ");
-                
-                for (compAtomKey, value) in zip(compAtom, values) {
-                    compAtomValue[compAtomKey] = value;
-                }
-                
-                guard let atom = Atom(from: compAtomValue) else {
-                    continue;
-                }
-                
-                atoms.append(atom);
-            }
+        let splitLine = line.split(separator: " ");
+        
+        if splitLine.count > 1 {
+            let key = splitLine[0].split(separator: ".").last!;
+            let value = splitLine.last!;
+            compValue[key] = value;
+            oneComp = true;
+        } else {
+            comp.append(line.split(separator: ".").last!);
         }
-        
-        return atoms;
     }
     
-    func getCompBondInfo(lines: [Substring]) -> [Bond] {
-        var compBond: [Substring] = [];
-        var bonds: [Bond] = [];
+    private func compAppend<T: ComponentBuildable>(for comp: inout [T], from compValue: [Substring: Substring]) {
+        guard let template = T(from: compValue) else {
+            print("Failed to create instance");
+            return;
+        }
+        
+        comp.append(template);
+    }
+    
+    private func getCompInfo<T: ComponentBuildable>(from lines: [Substring], for info: String) -> [T] {
+        let info: String = "_chem_comp_\(info)";
+        var type: [T] = [];
+        var comp: [Substring] = [];
+        var compValue: [Substring: Substring] = [:];
+        var oneComp: Bool = false;
         
         for line in lines {
-            if line.starts(with: "_chem_comp_bond") {
-                compBond.append(line.split(separator: ".").last!);
+            if line.starts(with: info) {
+                getCompValue(from: line, comp: &comp, compValue: &compValue, oneComp: &oneComp)
             } else if line.starts(with: "#") {
+                if oneComp {
+                    compAppend(for: &type, from: compValue);
+                }
                 break;
             } else {
-                var compBondValue: [Substring: Substring] = [:]
+                compValue = [:];
                 let values = line.split(separator: " ");
                 
-                for (compBondKey, value) in zip(compBond, values) {
-                    compBondValue[compBondKey] = value;
+                for (compKey, value) in zip(comp, values) {
+                    compValue[compKey] = value;
                 }
-                
-                guard let bond = Bond(from: compBondValue) else {
-                    continue;
-                }
-                
-                bonds.append(bond);
+                compAppend(for: &type, from: compValue);
             }
         }
         
-        return bonds;
+        return type;
     }
     
     func fetchProteinDetails(for identifier: String) async throws -> ([Atom], [Bond]) {
@@ -111,11 +110,17 @@ struct MockProteinsService: ProteinsService {
             }
             
             let lines: [Substring] = file.split(separator: "\n");
-            let atomLoopIndex: Int = lines.firstIndex(where: { $0.contains("_chem_comp_atom") })!;
-            let bondLoopIndex: Int = lines.firstIndex(where: { $0.contains("_chem_comp_bond") })!;
+            var loopIndex: Int = lines.firstIndex(where: { $0.contains("_chem_comp_atom") }) ?? 0;
             
-            let atoms = getCompAtomInfo(lines: Array(lines.dropFirst(atomLoopIndex)));
-            let bonds = getCompBondInfo(lines: Array(lines.dropFirst(bondLoopIndex)));
+            let atoms: [Atom] = loopIndex == 0
+                ? []
+                : getCompInfo(from: Array(lines.dropFirst(loopIndex)), for: "atom");
+
+            loopIndex = lines.firstIndex(where: { $0.contains("_chem_comp_bond") }) ?? 0;
+            
+            let bonds: [Bond] = loopIndex == 0
+                ? []
+                : getCompInfo(from: Array(lines.dropFirst(loopIndex)), for: "bond");
             
             return (atoms, bonds);
         } catch {
@@ -130,7 +135,7 @@ struct MockProteinsService: ProteinsService {
     func save(favoriteIDs: Set<String>) {
     }
     
-    // -- MARK -- PREVIEW -- \\
+    // MARK: Preview list
     
     func fetchListPreview() -> [Protein] {
         return ["001", "011", "031", "041", "04G", "083", "0AF", "0DS", "0DX", "0E5", "0EA", "0J0", "0JV", "0L8", "0MC", "0MD", "0RU", "0RY", "0RZ", "0S0", "0T6", "0T7"].map {
